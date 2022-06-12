@@ -2,19 +2,20 @@ version: '3'
 
 services:
   postgres-docker:
-    image: postgres
+    image: postgres:alpine3.16
     environment:
       POSTGRES_USERNAME: "postgres"
       POSTGRES_PASSWORD: "postgres"
       POSTGRES_DB: "postgres"
     ports:
-      - "5555:5432"
+      - "5432:5432"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres_data:/var/lib/postgresql/data
     networks:
       - network
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:8.5.5-ubuntu
     ports:
       - "3001:3000"
     user: "472"
@@ -26,6 +27,22 @@ services:
       - network
     depends_on:
       - postgres-docker
+  api:
+    image: golang:1.18-alpine
+    container_name: api
+    restart: always
+    depends_on:
+      - postgres-docker
+    links:
+      - postgres-docker
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - network
+    working_dir: /usr/src/app
+    command: go run main.go
 
 networks:
   network:
