@@ -9,7 +9,7 @@ This project allows you to visualize your hours programming on a dashboard in Gr
 ## How to run this project
 
 1. Run:
-```sudo chown 472:472 ./grafana_data```
+```sudo chown 472:472 ./grafana_data && sudo chmod -R 777 grafana_data```
 2. Run ```docker-compose up -d```
 3. Export `Daily totals` in WakaTime settings then download JSON file
 
