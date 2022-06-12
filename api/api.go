@@ -18,7 +18,9 @@ func Api(db *gorm.DB) {
 			log.Fatal(err)
 		}
 
-		for _, lang := range req.getAllLanguages() {
+		languages := req.getAllLanguages()
+
+		for _, lang := range languages {
 			if err := db.Create(&lang); err.Error != nil {
 				var dbResult model.Language
 				if err := db.Where("date = ? AND name = ?", lang.Date, lang.Name).Find(&dbResult); err.Error != nil {
@@ -31,7 +33,17 @@ func Api(db *gorm.DB) {
 			}
 		}
 
-		c.JSON(http.StatusOK, req)
+		c.JSON(http.StatusOK, languages)
+	})
+
+	r.GET("/backup/sql", func(c *gin.Context) {
+		var languages []model.Language
+		result := db.Find(&languages)
+		if result.Error != nil {
+			log.Fatal(result.Error)
+		}
+
+		c.String(http.StatusOK, model.ConvertToBackupSQL(languages))
 	})
 
 	if err := r.Run(); err != nil {
